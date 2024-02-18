@@ -1,0 +1,8 @@
+token.txt
+__pycache__
+.vscode
+sqlite3-pcre
+song*.mp3
+history.db
+.env
+quotes.json
