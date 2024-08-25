@@ -31,7 +31,7 @@ class music_cog(commands.Cog):
         self.count = 0
         self.ctx = None
 
-        self.vc = None
+        self.vc: discord.VoiceClient = None
 
 
      #searching the item on youtube
