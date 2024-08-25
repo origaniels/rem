@@ -31,6 +31,8 @@ class music_cog(commands.Cog):
         self.count = 0
         self.ctx = None
 
+        self.current_playlist: Playlist = None
+
         self.vc: discord.VoiceClient = None
 
 
@@ -233,6 +235,52 @@ class music_cog(commands.Cog):
         self.is_playing = False
         self.is_paused = False
         await ctx.bot.close()
+
+    @commands.command(name="list", aliases=["l"], help="Playlist interface. add, remove, stop, play, loop")
+    async def list(self, ctx, *args):
+        playlist_name = args[1]
+        query = " ".join(args[2:])
+        mode = args[0]
+        if mode=="add" or mode=="a":
+            await self.list_add(ctx, playlist_name, query)
+        elif mode=="remove" or mode=="r":
+            await self.list_remove(ctx, playlist_name, query)
+        elif mode=="play" or mode=="p":
+            self.current_playlist = open_playlist(playlist_name, self)
+            self.current_playlist.play()
+            self.current_playlist = None
+        elif mode=="stop" or mode=="s":
+            if self.current_playlist == None:
+                await ctx.send("Since no playlist was being played, Rem has done her best stopping a non-existant playlist.\It was no easy task, but Rem has made it out alive !")
+            else:
+                self.current_playlist.stop_playing()
+                ctx.voice_client.stop()
+        elif mode=="loop":
+            if self.current_playlist == None:
+                await ctx.send("Rem cannot loop on a playlist that isn't being played.")
+            else:
+                self.current_playlist.loop()
+        else:
+            await ctx.send(f"Rem cannot perform action {mode} on a playlist. Only [add, remove, stop, play, loop] are supported.")
+        
+        
+    
+    async def list_add(self, ctx, playlist_name, query):
+        if url(query):
+            song = query
+        else:
+            song = self.search(query)
+        playlist_add_song(playlist_name, song)
+        await ctx.send(f"Rem added {song} to playlist {playlist_name}")
+
+    async def list_remove(self, ctx, playlist_name, query):
+        if url(query):
+            song = query
+        else:
+            song = self.search(query)
+        playlist_remove_song(playlist_name, song)
+        await ctx.send(f"Rem removed {song} from playlist {playlist_name}")
+
 
 async def send_message(ctx, message_dict: dict[str, str], song=""):
     authorname = str(ctx.author)

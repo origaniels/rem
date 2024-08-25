@@ -2,6 +2,10 @@
 import os
 import shutil
 
+import discord
+
+import music_cog
+from src.playlists import Playlist
 
 from sqlite3 import *
 
@@ -12,11 +16,12 @@ def init_db():
     db = Connection('data/history.db', autocommit=False)
     curse = db.cursor()
     curse.execute('CREATE TABLE IF NOT EXISTS "history" ("nom"	TEXT, "écoutes"	INTEGER, "url"	TEXT, "file"	TEXT)')
+    curse.execute('CREATE TABLE IF NOT EXISTS "playlist" ("nom"	TEXT, "url"	TEXT)')
     db.commit()
     db.close()
 
 def db_add_entry(name: str, url: str, file: str, curse: Cursor):
-    curse.execute(f"INSERT INTO history (nom, écoutes, url, file) VALUES (%s, 1, %s, %s)", (name, url, file))
+    curse.execute(f"INSERT INTO history (nom, écoutes, url, file) VALUES (%s, 1, %s, %s)", (name, url, file))    
 
 
 def try_fetch(name: str, url: str):
@@ -77,3 +82,38 @@ def try_fetch(name: str, url: str):
             db.commit()
     db.close()
     return file
+
+def open_playlist(name: str, cog: music_cog.music_cog)->Playlist:
+    if not os.path.isfile("data/history.db"):
+        init_db()
+    
+    db = Connection('data/history.db', autocommit=False)
+    curse = db.cursor()
+    curse.execute('SELECT url FROM playlist WHERE name=%s', name)
+    songs = curse.fetchall()
+    db.close()
+
+    return Playlist(name, vc, songs)
+    
+
+def playlist_add_song(name: str, url: str)->None:
+    if not os.path.isfile("data/history.db"):
+        init_db()
+    
+    db = Connection('data/history.db', autocommit=False)
+    curse = db.cursor()
+
+    curse.execute('INSERT INTO playlist VALUES (%s, %s)', (name, url))
+    db.commit()
+    db.close()
+
+def playlist_remove_song(name: str, song: str):
+    if not os.path.isfile("data/history.db"):
+        init_db()
+    
+    db = Connection('data/history.db', autocommit=False)
+    curse = db.cursor()
+
+    curse.execute('DELETE FROM playlist WHERE name=%s, url=%s', (name, song))
+    db.commit()
+    db.close()
