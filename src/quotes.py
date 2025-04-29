@@ -94,7 +94,19 @@ def generate_default()->dict:
 
         "sleep": {
             "default": "Good night __PLACEHOLDER_USERNAME__-sama."
-        }
+        },
+
+        "list": {
+            "bad_request": {
+                "default": "__PLACEHOLDER_USERNAME__-sama, this is an invalid playlist command.\nValid commands are [`add`, `remove`, `play`].",
+            },
+            "remove_song": {
+                "default": "The song was removed from the playlist.",
+            },
+            "play": {
+                "default": "Added playlist to the queue.",
+            }
+        },
     }
     
     return res

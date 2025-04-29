@@ -4,9 +4,6 @@ import shutil
 
 import discord
 
-import music_cog
-from src.playlists import Playlist
-
 from sqlite3 import *
 
 from dotenv import load_dotenv
@@ -21,7 +18,7 @@ def init_db():
     db.close()
 
 def db_add_entry(name: str, url: str, file: str, curse: Cursor):
-    curse.execute(f"INSERT INTO history (nom, écoutes, url, file) VALUES (%s, 1, %s, %s)", (name, url, file))    
+    curse.execute(f"INSERT INTO history (nom, écoutes, url, file) VALUES (?, 1, ?, ?)", (name, url, file))    
 
 
 def try_fetch(name: str, url: str):
@@ -30,12 +27,13 @@ def try_fetch(name: str, url: str):
     
     db = Connection('data/history.db', autocommit=False)
     curse = db.cursor()
-
-    curse.execute(f"SELECT écoutes, file FROM history WHERE nom=%s", (name))
+    print(name)
+    print(type(name))
+    curse.execute(f"SELECT écoutes, file FROM history WHERE nom=?", (name,))
     db_entries_with_name = curse.fetchall()
 
     if db_entries_with_name !=[] and db_entries_with_name[0][1] != '': # the file is in the db
-        curse.execute(f"UPDATE history SET écoutes=%s WHERE nom=%s", db_entries_with_name[0][0]+1, name)
+        curse.execute(f"UPDATE history SET écoutes=? WHERE nom=?", (db_entries_with_name[0][0]+1, name))
         db.commit()
         file = f"data/{db_entries_with_name[0][1]}"
     else:
@@ -49,7 +47,7 @@ def try_fetch(name: str, url: str):
             if db_entries_with_name == []: # completely new song
                 db_add_entry(name, url, worst_file, curse)
             else: # the file is in the db but not in cache
-                curse.execute(f"UPDATE history SET file=%s, écoutes=%s WHERE nom=%s", worst_file, db_entries_with_name[0][0]+1, name)
+                curse.execute(f"UPDATE history SET file=?, écoutes=? WHERE nom=?", worst_file, db_entries_with_name[0][0]+1, (name))
         else:
             worst_ecoute = cached_songs[0][0]
             worst_file = cached_songs[0][1]
@@ -60,11 +58,11 @@ def try_fetch(name: str, url: str):
                     worst_file = cached_songs[i][1]
                 # we found the filename
 
-            curse.execute(f"UPDATE history SET file='' WHERE file=%s", worst_file)
+            curse.execute(f"UPDATE history SET file='' WHERE file=?", worst_file)
             if db_entries_with_name == []:
                 db_add_entry(name, url, worst_file, curse)
             else:
-                curse.execute(f"UPDATE history SET file=%s, écoutes=%s WHERE nom=%s", worst_file, db_entries_with_name[0][0]+1, name)
+                curse.execute(f"UPDATE history SET file=?, écoutes=? WHERE nom=?", worst_file, db_entries_with_name[0][0]+1, name)
         
         file = f"data/{worst_file}"
         if os.path.isfile(file):
@@ -83,17 +81,17 @@ def try_fetch(name: str, url: str):
     db.close()
     return file
 
-def open_playlist(name: str, cog: music_cog.music_cog)->Playlist:
+def open_playlist(name: str)->list[str]:
     if not os.path.isfile("data/history.db"):
         init_db()
     
     db = Connection('data/history.db', autocommit=False)
     curse = db.cursor()
-    curse.execute('SELECT url FROM playlist WHERE name=%s', name)
+    curse.execute("SELECT url FROM playlist WHERE nom=?", (name,))
     songs = curse.fetchall()
     db.close()
 
-    return Playlist(name, vc, songs)
+    return [song[0] for song in songs]
     
 
 def playlist_add_song(name: str, url: str)->None:
@@ -102,8 +100,8 @@ def playlist_add_song(name: str, url: str)->None:
     
     db = Connection('data/history.db', autocommit=False)
     curse = db.cursor()
-
-    curse.execute('INSERT INTO playlist VALUES (%s, %s)', (name, url))
+    print(url)
+    curse.execute("INSERT INTO playlist VALUES (?, ?)", (name, url))
     db.commit()
     db.close()
 
@@ -114,6 +112,6 @@ def playlist_remove_song(name: str, song: str):
     db = Connection('data/history.db', autocommit=False)
     curse = db.cursor()
 
-    curse.execute('DELETE FROM playlist WHERE name=%s, url=%s', (name, song))
+    curse.execute("DELETE FROM playlist WHERE nom=?, url=?", (name, song))
     db.commit()
     db.close()

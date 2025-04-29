@@ -6,7 +6,7 @@ from os import environ
 
 #from youtube_dl import YoutubeDL
 from youtubesearchpython import *
-from src.history_manager import *
+from src.history_manager import try_fetch, open_playlist, playlist_add_song, playlist_remove_song
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -222,7 +222,7 @@ class music_cog(commands.Cog):
         else:
             await send_message(ctx, self.quotes["queue"]["empty_queue"])
 
-    @commands.command(name="leave", aliases=["disconnect", "l", "dis"], help="Kick the bot from VC")
+    @commands.command(name="leave", aliases=["disconnect", "dis"], help="Kick the bot from VC")
     async def dis(self, ctx):
         self.is_playing = False
         self.is_paused = False
@@ -246,22 +246,13 @@ class music_cog(commands.Cog):
         elif mode=="remove" or mode=="r":
             await self.list_remove(ctx, playlist_name, query)
         elif mode=="play" or mode=="p":
-            self.current_playlist = open_playlist(playlist_name, self)
-            self.current_playlist.play()
-            self.current_playlist = None
-        elif mode=="stop" or mode=="s":
-            if self.current_playlist == None:
-                await ctx.send("Since no playlist was being played, Rem has done her best stopping a non-existant playlist.\It was no easy task, but Rem has made it out alive !")
-            else:
-                self.current_playlist.stop_playing()
-                ctx.voice_client.stop()
-        elif mode=="loop":
-            if self.current_playlist == None:
-                await ctx.send("Rem cannot loop on a playlist that isn't being played.")
-            else:
-                self.current_playlist.loop()
+            
+            songs: list[str] = open_playlist(playlist_name)
+            self.music_queue += [[song, ctx.author.voice.channel] for song in songs]
+            if self.is_playing == False:
+                await self.play_music(ctx)
         else:
-            await ctx.send(f"Rem cannot perform action {mode} on a playlist. Only [add, remove, stop, play, loop] are supported.")
+            await send_message(ctx, self.quotes["list"]["bad_request"])
         
         
     
