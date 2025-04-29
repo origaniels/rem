@@ -5,9 +5,10 @@
 
     ```sh
     pip install yt-dlp youtube-search-python discord validators python-dotenv
-    pip install -U discord.py[voice]
+    pip install -U "discord.py[voice]"
     ```
-
+    Make sure the version of `pip` you are running is the one corresponding to `python3.12` or higher.
+  
 - Install [ffmpeg](https://www.ffmpeg.org/download.html)
 
 
