@@ -6,7 +6,7 @@ from os import environ
 
 #from youtube_dl import YoutubeDL
 from youtubesearchpython import *
-from src.history_manager import *
+from src.history_manager import try_fetch, open_playlist, playlist_add_song, playlist_remove_song
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -31,7 +31,9 @@ class music_cog(commands.Cog):
         self.count = 0
         self.ctx = None
 
-        self.vc = None
+        self.current_playlist: Playlist = None
+
+        self.vc: discord.VoiceClient = None
 
 
      #searching the item on youtube
@@ -220,7 +222,7 @@ class music_cog(commands.Cog):
         else:
             await send_message(ctx, self.quotes["queue"]["empty_queue"])
 
-    @commands.command(name="leave", aliases=["disconnect", "l", "dis"], help="Kick the bot from VC")
+    @commands.command(name="leave", aliases=["disconnect", "dis"], help="Kick the bot from VC")
     async def dis(self, ctx):
         self.is_playing = False
         self.is_paused = False
@@ -233,6 +235,43 @@ class music_cog(commands.Cog):
         self.is_playing = False
         self.is_paused = False
         await ctx.bot.close()
+
+    @commands.command(name="list", aliases=["l"], help="Playlist interface. add, remove, stop, play, loop")
+    async def list(self, ctx, *args):
+        playlist_name = args[1]
+        query = " ".join(args[2:])
+        mode = args[0]
+        if mode=="add" or mode=="a":
+            await self.list_add(ctx, playlist_name, query)
+        elif mode=="remove" or mode=="r":
+            await self.list_remove(ctx, playlist_name, query)
+        elif mode=="play" or mode=="p":
+            
+            songs: list[str] = open_playlist(playlist_name)
+            self.music_queue += [[song, ctx.author.voice.channel] for song in songs]
+            if self.is_playing == False:
+                await self.play_music(ctx)
+        else:
+            await send_message(ctx, self.quotes["list"]["bad_request"])
+        
+        
+    
+    async def list_add(self, ctx, playlist_name, query):
+        if url(query):
+            song = query
+        else:
+            song = self.search(query)
+        playlist_add_song(playlist_name, song)
+        await ctx.send(f"Rem added {song} to playlist {playlist_name}")
+
+    async def list_remove(self, ctx, playlist_name, query):
+        if url(query):
+            song = query
+        else:
+            song = self.search(query)
+        playlist_remove_song(playlist_name, song)
+        await ctx.send(f"Rem removed {song} from playlist {playlist_name}")
+
 
 async def send_message(ctx, message_dict: dict[str, str], song=""):
     authorname = str(ctx.author)

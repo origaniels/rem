@@ -29,7 +29,7 @@ async def setup(bot):
     await bot.add_cog(music_cog(bot, parsed_quotes))
 
 def main():
-    bot = commands.Bot(command_prefix='rem', intents=discord.Intents.all())
+    bot = commands.Bot(command_prefix=os.environ.get('PREFIX'), intents=discord.Intents.all())
     asyncio.run(setup(bot))
     bot.run(os.environ.get('BOT_TOKEN'))
 
