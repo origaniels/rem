@@ -27,8 +27,6 @@ def try_fetch(name: str, url: str):
     
     db = Connection('data/history.db', autocommit=False)
     curse = db.cursor()
-    print(name)
-    print(type(name))
     curse.execute(f"SELECT écoutes, file FROM history WHERE nom=?", (name,))
     db_entries_with_name = curse.fetchall()
 
@@ -58,7 +56,7 @@ def try_fetch(name: str, url: str):
                     worst_file = cached_songs[i][1]
                 # we found the filename
 
-            curse.execute(f"UPDATE history SET file='' WHERE file=?", worst_file)
+            curse.execute(f"UPDATE history SET file='' WHERE file=?", (worst_file,))
             if db_entries_with_name == []:
                 db_add_entry(name, url, worst_file, curse)
             else:
@@ -100,7 +98,6 @@ def playlist_add_song(name: str, url: str)->None:
     
     db = Connection('data/history.db', autocommit=False)
     curse = db.cursor()
-    print(url)
     curse.execute("INSERT INTO playlist VALUES (?, ?)", (name, url))
     db.commit()
     db.close()
