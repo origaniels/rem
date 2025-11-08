@@ -38,7 +38,7 @@ class music_cog(commands.Cog):
 
      #searching the item on youtube
     def search(self, query):    
-        customSearch = CustomSearch(query,SearchMode.videos, limit = 20)
+        customSearch = VideosSearch(query, limit = 20)
         i=0
         name=customSearch.result()['result'][i]['title']
         s1='EXTENDED'
