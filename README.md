@@ -4,12 +4,13 @@
 - Install the pip dependencies by running:
 
     ```sh
-    pip install yt-dlp youtube-search-python discord validators python-dotenv
+    pip install youtube-search-python discord validators python-dotenv
     pip install -U "discord.py[voice]"
     ```
     Make sure the version of `pip` you are running is the one corresponding to `python3.12` or higher.
   
 - Install [ffmpeg](https://www.ffmpeg.org/download.html)
+- Install [yt-dlp](https://github.com/yt-dlp/yt-dlp/releases)
 
 
 
@@ -21,6 +22,7 @@ You can do so by putting the following in a `.env` file at the root of this repo
 FFMPEG_PATH="your/path/to/ffmpeg_exe"
 BOT_TOKEN="your_bot_token"
 YTDLP_PATH="your/path/to/yt_dlp_exe"
+PREFIX="your_bot_command_prefix"
 ```
 The executable for `yt-dlp` should be in the `Scripts`folder of your python installation folder
 
