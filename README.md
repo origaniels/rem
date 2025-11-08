@@ -7,6 +7,10 @@
     pip install youtube-search-python discord validators python-dotenv
     pip install -U "discord.py[voice]"
     ```
+- `youtube-search-python` currently runs only on `httpx<0.28` (need to find a better package)
+    ```
+    pip install --force-reinstall 'httpx<0.28'
+    ```
     Make sure the version of `pip` you are running is the one corresponding to `python3.12` or higher.
   
 - Install [ffmpeg](https://www.ffmpeg.org/download.html)
