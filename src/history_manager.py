@@ -45,7 +45,7 @@ def try_fetch(name: str, url: str):
             if db_entries_with_name == []: # completely new song
                 db_add_entry(name, url, worst_file, curse)
             else: # the file is in the db but not in cache
-                curse.execute(f"UPDATE history SET file=?, écoutes=? WHERE nom=?", worst_file, db_entries_with_name[0][0]+1, (name))
+                curse.execute(f"UPDATE history SET file=?, écoutes=? WHERE nom=?", (worst_file, db_entries_with_name[0][0]+1, name))
         else:
             worst_ecoute = cached_songs[0][0]
             worst_file = cached_songs[0][1]
@@ -60,7 +60,7 @@ def try_fetch(name: str, url: str):
             if db_entries_with_name == []:
                 db_add_entry(name, url, worst_file, curse)
             else:
-                curse.execute(f"UPDATE history SET file=?, écoutes=? WHERE nom=?", worst_file, db_entries_with_name[0][0]+1, name)
+                curse.execute(f"UPDATE history SET file=?, écoutes=? WHERE nom=?", (worst_file, db_entries_with_name[0][0]+1, name))
         
         file = f"data/{worst_file}"
         if os.path.isfile(file):
